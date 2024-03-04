@@ -21,6 +21,9 @@ for (let pageNumber = from; pageNumber <= to; pageNumber++) {
   }
 }
 
+// テスト用
+// const itemLinkArray = ['https://coconala.com/services/3157875?ref=category_popular_subcategories&ref_kind=category&ref_no=1&pos=1&ref_sort=beginner&ref_page=1&ref_category=661&service_order=1&service_order_with_pr=1&service_order_only_pr=null']
+
 const items = []
 for(const itemLink of itemLinkArray){
   await page.goto(itemLink)
@@ -42,6 +45,19 @@ for(const itemLink of itemLinkArray){
   // 商品名の取得
   itemData.title = await page.$eval('.c-overview_overview', element => element.textContent.trim())
   itemData.subtitle = await page.$eval('.c-overview_text', element => element.textContent.trim())
+  // 価格の取得
+  const itemPrice = await page.$eval('.c-price_price', element => element.textContent.trim())
+  itemData.price = Number(itemPrice.replace(/[^\d.-]/g, ''))
+  // 評価の取得
+  const itemRate = await page.$eval('.c-ratingIndicator', element => element.textContent.trim())
+  itemData.rate = Number(itemRate.replace(/[^\d.-]/g, ''))
+  const itemRateCount = await page.$eval('.c-ratingIndicatorCount', element => element.textContent.trim())
+  const match = itemRateCount.match(/\(([\d,]+)\)/)
+  itemData.rateCount = Number(match[1])
+  // 販売数の取得 
+  const salesCount = await page.$eval('.c-performance_sales .c-performance_content', element => element.textContent.trim())
+  itemData.salesCount = Number(salesCount.replace(/[^\d.-]/g, ''))
+
   // 商品情報の取得
   const itemDetail = await page.$$('.c-serviceContentsSummary-consultation .c-contentsFreeText')
   const itemInfoArray = []
@@ -90,10 +106,17 @@ for(const itemLink of itemLinkArray){
 
 
 function arrayToCSV(array) {
-  let csv = 'title,subtitle,detail,shopLink,optionName,optionPrice'
+  let csv = 'price,salesCount,rate,rateCount,title,subtitle,detail,shopLink,optionName,optionPrice'
   for(const data of array){
     csv += '\n'
-    csv += `"${data.title.replace(/"/g, '""')}","${data.subtitle.replace(/"/g, '""')}","${data.detail.join('\n').replace(/"/g, '""')}","${data.shopLink}",`
+    csv += `${data.price},`
+    csv += `${data.salesCount},`
+    csv += `${data.rate},`
+    csv += `${data.rateCount},`
+    csv += `"${data.title.replace(/"/g, '""')}",`
+    csv += `"${data.subtitle.replace(/"/g, '""')}",`
+    csv += `"${data.detail.join('\n').replace(/"/g, '""')}",`
+    csv += `${data.shopLink},`
 
     if(data.option.length == 0){
       csv += ',,'
@@ -101,7 +124,7 @@ function arrayToCSV(array) {
       let optionNumber = 1
       for(const option of data.option){
         if(optionNumber != 1){
-          csv += '\n,,,,'
+          csv += '\n,,,,,,,,'
         }
         csv += `"${option.name}",${option.price}`
         optionNumber++

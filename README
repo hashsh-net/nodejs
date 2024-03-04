@@ -1,0 +1,6 @@
+### Git Clone
+git clone 'このリポジトリのURL'で
+
+### npm installの実行
+下記コマンドを実行して必要なパッケージのinstall
+npm install

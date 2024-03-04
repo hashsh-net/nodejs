@@ -1,0 +1,12 @@
+{
+  "name": "node js practice",
+  "version": "1.0.0",
+  "description": "WeedBank",
+  "author": "hashsh2000",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {},
+  "dependencies": {
+    "playwright": "^1.42.1"
+  }
+}

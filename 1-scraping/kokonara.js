@@ -27,7 +27,6 @@ for(const categoryUrl of categoryUrlArray){
   await page.waitForTimeout(200)
 
   for (let pageNumber = from; pageNumber <= to; pageNumber++) {
-    const categoryUrl = 'https://coconala.com/categories/661?ref=category_popular_subcategories&price_min=1000&price_max=5000&ref_c=1&y=0&business_flag=false&page='
     await page.goto(`${categoryUrl}${pageNumber}`)
     // 商品一覧のリンクエレメントを取得
     const itemLinkElements = await page.$$('.c-searchPageItemList_inner')

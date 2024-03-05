@@ -70,9 +70,9 @@ for(const itemLink of itemLinkArray){
   const sales = await page.$eval('.c-performance_sales .c-performance_content', element => element.textContent.trim())
   itemData.sales = Number(sales.replace(/[^\d.-]/g, ''))
   // 残枠数
-  itemData.remainingSlot = await page.$eval('.c-performance_stock .c-performance_content strong:nth-child(1)', element => element.textContent.trim())
+  itemData.remainingSlot = await page.$eval('.c-performance_stock .c-performance_content strong:nth-child(1)', element => Number(element.textContent.trim()))
   // お願い中
-  itemData.requestedCustomer = await page.$eval('.c-performance_stock .c-performance_content strong:nth-child(2)', element => element.textContent.trim())
+  itemData.requestedCustomer = await page.$eval('.c-performance_stock .c-performance_content strong:nth-child(2)', element => Number(element.textContent.trim()))
   // お気に入り登録数
   const favoriteCount = await page.$eval('.c-serviceContentsMenuPc_items .c-favButtonTextCount_num', element => element.textContent.trim())
   itemData.favoriteCount = Number(favoriteCount.replace(/[^\d.-]/g, ''))
@@ -121,9 +121,40 @@ for(const itemLink of itemLinkArray){
 
   // オプションここまで
   // =====================================================================
-  console.log(itemData.option)
 
-  items.push(itemData)
+  // 鑑定・カウンセリング
+  const boolElements = await page.$$('.c-contentsSpecificationsInnerList_check .coconala-icon')
+  const appraisal = boolElements[0]
+  itemData.appraisal = await appraisal.evaluate(element => element.classList.contains('-check'))
+  const counseling = boolElements[1]
+  itemData.counseling = await counseling.evaluate(element => element.classList.contains('-check'))
+  // お届け日数・初回返答時間
+  const speedElement = await page.$$('.c-contentsSpecificationsInnerList_value span')
+  const deliveryDays = await speedElement[0].textContent()
+  const firstResponseTime = await speedElement[1].textContent()
+  itemData.deliveryDays = deliveryDays.trim()
+  itemData.firstResponseTime = firstResponseTime.trim()
+  // スタイル
+  const tagElement = await page.$$('.c-tagList')
+  const styleArray = []
+  const styleElement = tagElement[0]
+  const styleLinkElement = await styleElement.$$('a')
+  for (const styleData of styleLinkElement) {
+    const style = await styleData.textContent()
+    styleArray.push(style.trim())
+  }
+  itemData.style = styleArray
+  // 占術
+  const divinationArray = []
+  const divinationElement = tagElement[1]
+  const divinationLinkElement = await divinationElement.$$('a')
+  for (const divinationData of divinationLinkElement) {
+    const divination = await divinationData.textContent()
+    divinationArray.push(divination.trim())
+  }
+  itemData.divination = divinationArray
+
+  console.log(itemData)
 }
 
 

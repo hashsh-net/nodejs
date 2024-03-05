@@ -19,7 +19,7 @@ const categoryUrlArray = [
 
 // fromページからtoページ目までアクセスして商品情報を取得
 const from = 1
-const to = 999
+const to = 1
 const itemLinkArray = []
 
 for(const categoryUrl of categoryUrlArray){
@@ -55,11 +55,12 @@ for(const categoryUrl of categoryUrlArray){
 
 const errorLinks = []
 for(const itemLink of itemLinkArray){
+  const itemData = {}
+
   try {
     console.log(itemLink)
     await page.goto(itemLink)
 
-    const itemData = {}
     const detailButton = await page.$('.c-contentsFreeText_readMore a')
 
     if(detailButton){
@@ -69,56 +70,116 @@ for(const itemLink of itemLinkArray){
     // =====================================================================
     // ID
     const idData = itemLink.match(/\/services\/(\d+)\?/)
-    itemData.id = idData[1]
+    if(idData.length >= 2){
+      itemData.id = idData[1]
+    }else{
+      itemData.id = itemLink
+    }
     // タイトル
-    itemData.title = await page.$eval('.c-overview_overview', element => element.textContent.trim())
+    try {
+      const element = await page.$('.c-overview_overview')
+      const text = await element.textContent()
+      itemData.title = text.trim()
+    } catch (error) {
+      itemData.title = ''
+    }
     // サブタイトル
-    itemData.subtitle = await page.$eval('.c-overview_text', element => element.textContent.trim())
+    try {
+      const element = await page.$('.c-overview_text')
+      const text = await element.textContent()
+      itemData.subtitle = text.trim()
+    } catch (error) {
+      itemData.subtitle = ''
+    }
     // カテゴリ
-    itemData.category = await page.$eval('.c-contentHeader li:nth-child(3)', element => element.textContent.trim())
+    try {
+      const element = await page.$('.c-contentHeader li:nth-child(3)')
+      const text = await element.textContent()
+      itemData.category = text.trim()
+    } catch (error) {
+      itemData.category = ''
+    }
     // 小カテゴリ
     if (itemData.category == '占い全般' || itemData.category == 'その他占い' || itemData.category == '占いのやり方・アドバイス'){
       itemData.smallCategory = ''
     }else{
-      itemData.smallCategory = await page.$eval('.c-contentHeader li:nth-child(4)', element => element.textContent.trim())
+      try {
+        const element = await page.$('.c-contentHeader li:nth-child(4)')
+        const text = await element.textContent()
+        itemData.smallCategory = text.trim()
+      } catch (error) {
+        itemData.smallCategory = ''
+      }
     }
     // 価格
-    const itemPrice = await page.$eval('.c-price_price', element => element.textContent.trim())
-    itemData.price = Number(itemPrice.replace(/[^\d.-]/g, ''))
+    try {
+      const element = await page.$('.c-price_price')
+      const text = await element.textContent()
+      const number = text.trim().replace(/[^\d.-]/g, '')
+      itemData.price = Number(number)
+    } catch (error) {
+      itemData.price = 0
+    }
     // 出品者ID
     const shopLink = await page.$eval('.c-serviceDetailProvider_link', element => element.getAttribute('href'))
     itemData.shopId = shopLink.replace('/users/','')
     // 販売実績数
-    const sales = await page.$eval('.c-performance_sales .c-performance_content', element => element.textContent.trim())
-    itemData.sales = Number(sales.replace(/[^\d.-]/g, ''))
+    try {
+      const element = await page.$('.c-performance_sales .c-performance_content')
+      const text = await element.textContent()
+      const number = text.trim().replace(/[^\d.-]/g, '')
+      itemData.sales = Number(number)
+    } catch (error) {
+      itemData.sales = 0
+    }
     // 残枠数
-    itemData.remainingSlot = await page.$eval('.c-performance_stock .c-performance_content strong:nth-child(1)', element => Number(element.textContent.trim()))
+    try {
+      const element = await page.$('.c-performance_stock .c-performance_content strong:nth-child(1)')
+      const text = await element.textContent()
+      itemData.remainingSlot = Number(text.trim())
+    } catch (error) {
+      itemData.remainingSlot = 0
+    }
     // お願い中
-    itemData.requestedCustomer = await page.$eval('.c-performance_stock .c-performance_content strong:nth-child(2)', element => Number(element.textContent.trim()))
+    try {
+      const element = await page.$('.c-performance_stock .c-performance_content strong:nth-child(2)')
+      const text = await element.textContent()
+      itemData.requestedCustomer = Number(text.trim())
+    } catch (error) {
+      itemData.requestedCustomer = 0
+    }
     // お気に入り登録数
-    const favoriteCount = await page.$eval('.c-serviceContentsMenuPc_items .c-favButtonTextCount_num', element => element.textContent.trim())
-    itemData.favoriteCount = Number(favoriteCount.replace(/[^\d.-]/g, ''))
+    try {
+      const element = await page.$('.c-serviceContentsMenuPc_items .c-favButtonTextCount_nu')
+      const text = await element.textContent()
+      itemData.favoriteCount = Number(text.trim())
+    } catch (error) {
+      itemData.favoriteCount = 0
+    }
     // 評価件数
     try {
-      const ratingCount = await page.$eval('.c-ratingIndicatorCount', element => element.textContent.trim());
-      const match = ratingCount.match(/\(([\d,]+)\)/);
-      itemData.ratingCount = Number(match[1]);
+      const ratingCount = await page.$eval('.c-ratingIndicatorCount', element => element.textContent.trim())
+      const match = ratingCount.match(/\(([\d,]+)\)/)
+      itemData.ratingCount = Number(match[1])
     } catch (error) {
-        console.error("評価件数の取得に失敗しました:", error.message);
-        itemData.ratingCount = 0; // エラーが発生した場合、評価件数を0に設定するなどの処理を行う
+        itemData.ratingCount = 0
     }
     // 平均評価
     try {
-        const averageRating = await page.$eval('.c-ratingIndicator', element => element.textContent.trim());
-        itemData.averageRating = Number(averageRating.replace(/[^\d.-]/g, ''));
+        const averageRating = await page.$eval('.c-ratingIndicator', element => element.textContent.trim())
+        itemData.averageRating = Number(averageRating.replace(/[^\d.-]/g, ''))
     } catch (error) {
-        console.error("平均評価の取得に失敗しました:", error.message);
-        itemData.averageRating = 0; // エラーが発生した場合、平均評価を0に設定するなどの処理を行う
+        itemData.averageRating = 0
     }
     // 商品詳細・購入フロー
-    const details = await page.$$eval('.c-contentsFreeText_text', elements => elements.map(element => element.textContent.trim()))
-    itemData.itemDetail = details[0]
-    itemData.purchaseFlow = details[1]
+    try {
+      const details = await page.$$eval('.c-contentsFreeText_text', elements => elements.map(element => element.textContent.trim()))
+      itemData.itemDetail = details[0] || ''
+      itemData.purchaseFlow = details[1] || ''
+    } catch (error) {
+        itemData.itemDetail = ''
+        itemData.purchaseFlow = ''
+    }
 
     // =======================================================
     // オプションここから
@@ -162,12 +223,17 @@ for(const itemLink of itemLinkArray){
     const counseling = boolElements[1]
     itemData.counseling = false
     if(counseling) itemData.counseling = await counseling.evaluate(element => element.classList.contains('-check'))
-    // お届け日数・初回返答時間
+    // お届け日数
     const speedElement = await page.$$('.c-contentsSpecificationsInnerList_value span')
     const deliveryDays = await speedElement[0].textContent()
-    const firstResponseTime = await speedElement[1].textContent()
     itemData.deliveryDays = deliveryDays.trim()
-    itemData.firstResponseTime = firstResponseTime.trim()
+    // 初回返答時間
+    if (speedElement.length >= 2) {
+      const firstResponseTime = await speedElement[1].textContent().catch(() => '')
+      itemData.firstResponseTime = firstResponseTime.trim()
+    } else {
+        itemData.firstResponseTime = ''
+    }
     // スタイル
     const tagElement = await page.$$('.c-tagList')
     const styleArray = []
@@ -188,14 +254,16 @@ for(const itemLink of itemLinkArray){
     }
     itemData.divination = divinationArray
 
-    // BigQueryに保存
-    await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
+    console.log(itemData)
 
   }catch(error){
     errorLinks.push(itemLink)
     console.log(itemLink)
     console.log(error)
   }
+
+  // BigQueryに保存
+  await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
 }
 
 browser.close()

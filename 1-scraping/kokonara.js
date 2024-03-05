@@ -32,6 +32,7 @@ for(const categoryUrl of categoryUrlArray){
     // 商品一覧のリンクエレメントを取得
     const itemLinkElements = await page.$$('.c-searchPageItemList_inner')
 
+    console.log(pageNumber)
     // 商品一覧がなくなったらループ終了
     if(itemLinkElements.length == 0){
       console.log(`${categoryUrl}${pageNumber}`)
@@ -56,6 +57,7 @@ for(const categoryUrl of categoryUrlArray){
 const errorLinks = []
 for(const itemLink of itemLinkArray){
   try {
+    console.log(itemLink)
     await page.goto(itemLink)
 
     const itemData = {}
@@ -177,7 +179,7 @@ for(const itemLink of itemLinkArray){
 
     // BigQueryに保存
     await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
-    
+
   }catch(error){
     errorLinks.push(itemLink)
     console.log(itemLink)

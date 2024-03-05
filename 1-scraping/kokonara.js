@@ -177,6 +177,7 @@ for(const itemLink of itemLinkArray){
 
     // BigQueryに保存
     await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
+    
   }catch(error){
     errorLinks.push(itemLink)
     console.log(itemLink)
@@ -186,11 +187,10 @@ for(const itemLink of itemLinkArray){
 
 browser.close()
 
-const errorLinksFilePath = 'error_links.json'
-fs.writeFile(errorLinksFilePath, JSON.stringify(errorLinks), (err) => {
+fs.writeFile('error_links.json', JSON.stringify(errorLinks), (err) => {
   if (err) {
     console.error('エラーリンクをファイルに書き込む際にエラーが発生しました:', err)
   } else {
-    console.log(`エラーリンクが ${errorLinksFilePath} に保存されました。`)
+    console.log(`エラーリンクが保存されました。`)
   }
 })

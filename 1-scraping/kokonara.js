@@ -77,7 +77,7 @@ for(const itemLink of itemLinkArray){
     // カテゴリ
     itemData.category = await page.$eval('.c-contentHeader li:nth-child(3)', element => element.textContent.trim())
     // 小カテゴリ
-    if (itemData.category == '占い全般' || itemData.category == 'その他占い'){
+    if (itemData.category == '占い全般' || itemData.category == 'その他占い' || itemData.category == '占いのやり方・アドバイス'){
       itemData.smallCategory = ''
     }else{
       itemData.smallCategory = await page.$eval('.c-contentHeader li:nth-child(4)', element => element.textContent.trim())
@@ -99,12 +99,22 @@ for(const itemLink of itemLinkArray){
     const favoriteCount = await page.$eval('.c-serviceContentsMenuPc_items .c-favButtonTextCount_num', element => element.textContent.trim())
     itemData.favoriteCount = Number(favoriteCount.replace(/[^\d.-]/g, ''))
     // 評価件数
-    const ratingCount = await page.$eval('.c-ratingIndicatorCount', element => element.textContent.trim())
-    const match = ratingCount.match(/\(([\d,]+)\)/)
-    itemData.ratingCount = Number(match[1])
+    try {
+      const ratingCount = await page.$eval('.c-ratingIndicatorCount', element => element.textContent.trim());
+      const match = ratingCount.match(/\(([\d,]+)\)/);
+      itemData.ratingCount = Number(match[1]);
+    } catch (error) {
+        console.error("評価件数の取得に失敗しました:", error.message);
+        itemData.ratingCount = 0; // エラーが発生した場合、評価件数を0に設定するなどの処理を行う
+    }
     // 平均評価
-    const averageRating = await page.$eval('.c-ratingIndicator', element => element.textContent.trim())
-    itemData.averageRating = Number(averageRating.replace(/[^\d.-]/g, ''))
+    try {
+        const averageRating = await page.$eval('.c-ratingIndicator', element => element.textContent.trim());
+        itemData.averageRating = Number(averageRating.replace(/[^\d.-]/g, ''));
+    } catch (error) {
+        console.error("平均評価の取得に失敗しました:", error.message);
+        itemData.averageRating = 0; // エラーが発生した場合、平均評価を0に設定するなどの処理を行う
+    }
     // 商品詳細・購入フロー
     const details = await page.$$eval('.c-contentsFreeText_text', elements => elements.map(element => element.textContent.trim()))
     itemData.itemDetail = details[0]
@@ -147,9 +157,11 @@ for(const itemLink of itemLinkArray){
     // 鑑定・カウンセリング
     const boolElements = await page.$$('.c-contentsSpecificationsInnerList_check .coconala-icon')
     const appraisal = boolElements[0]
-    itemData.appraisal = await appraisal.evaluate(element => element.classList.contains('-check'))
+    itemData.appraisal = false
+    if(appraisal) itemData.appraisal = await appraisal.evaluate(element => element.classList.contains('-check'))
     const counseling = boolElements[1]
-    itemData.counseling = await counseling.evaluate(element => element.classList.contains('-check'))
+    itemData.counseling = false
+    if(counseling) itemData.counseling = await counseling.evaluate(element => element.classList.contains('-check'))
     // お届け日数・初回返答時間
     const speedElement = await page.$$('.c-contentsSpecificationsInnerList_value span')
     const deliveryDays = await speedElement[0].textContent()

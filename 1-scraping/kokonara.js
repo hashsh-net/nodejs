@@ -17,6 +17,21 @@ const categoryUrlArray = [
   'https://coconala.com/categories/79?ref_c=1&service_kind=0&y=0&page=',                      // その他(占い)
 ]
 
+const RETRY_LIMIT = 3
+async function retryPageLoad(page, url, retryLimit) {
+  let retryCount = 1
+  while (retryCount < retryLimit) {
+    try {
+      await page.goto(url)
+      return
+    } catch (error) {
+      console.error(`Failed to load page (${retryCount}/${retryLimit}):`, error.message)
+      retryCount++
+    }
+  }
+  console.error('Reached retry limit. Page load failed.')
+}
+
 // fromページからtoページ目までアクセスして商品情報を取得
 const from = 1
 const to = 999
@@ -26,6 +41,7 @@ for(const categoryUrl of categoryUrlArray){
   for (let pageNumber = from; pageNumber <= to; pageNumber++) {
     console.log(pageNumber)
     await page.goto(`${categoryUrl}${pageNumber}`)
+    await retryPageLoad(page, `${categoryUrl}${pageNumber}`, RETRY_LIMIT)
     // 商品一覧のリンクエレメントを取得
     const itemLinkElements = await page.$$('.c-searchPageItemList_inner')
 
@@ -66,7 +82,7 @@ for(const itemLink of itemLinkArray){
   const itemData = {}
 
   try {
-    await page.goto(itemLink)
+    await retryPageLoad(page, itemLink, RETRY_LIMIT)
 
     const detailButton = await page.$('.c-contentsFreeText_readMore a')
 

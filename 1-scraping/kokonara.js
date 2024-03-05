@@ -19,14 +19,12 @@ const categoryUrlArray = [
 
 // fromページからtoページ目までアクセスして商品情報を取得
 const from = 1
-const to = 9999
+const to = 999
 const itemLinkArray = []
 
 for(const categoryUrl of categoryUrlArray){
-  await page.goto(`${categoryUrl}1`)
-  await page.waitForTimeout(200)
-
   for (let pageNumber = from; pageNumber <= to; pageNumber++) {
+    console.log(pageNumber)
     await page.goto(`${categoryUrl}${pageNumber}`)
     // 商品一覧のリンクエレメントを取得
     const itemLinkElements = await page.$$('.c-searchPageItemList_inner')
@@ -46,13 +44,15 @@ for(const categoryUrl of categoryUrlArray){
 }
 
 
-// // テスト用
+// テスト用
 // const itemLinkArray = [
-//   'https://coconala.com/services/3157875?ref=category_popular_subcategories&ref_kind=category&ref_no=1&pos=1&ref_sort=beginner&ref_page=1&ref_category=661&service_order=1&service_order_with_pr=1&service_order_only_pr=null',
+//   'https://coconala.com/services/53600?ref_kind=category&ref_no=5719&service_order=5719&service_order_with_pr=5719&service_order_only_pr=null',
+//   'https://coconala.com/services/406364?ref_kind=category&ref_no=5697&service_order=5697&service_order_with_pr=5697&service_order_only_pr=null',
 //   'https://coconala.com/services/3144746?ref_kind=category&ref_no=6&pos=6&ref_sort=beginner&ref_page=&ref_category=656&service_order=5&service_order_with_pr=6&service_order_only_pr=null'
 // ]
 
 const errorLinks = []
+let totalCount = 1
 for(const itemLink of itemLinkArray){
   const itemData = {}
 
@@ -233,23 +233,26 @@ for(const itemLink of itemLinkArray){
         itemData.firstResponseTime = ''
     }
     // スタイル
-    const tagElement = await page.$$('.c-tagList')
-    const styleArray = []
-    const styleElement = tagElement[0]
-    const styleLinkElement = await styleElement.$$('a')
-    for (const styleData of styleLinkElement) {
-      const style = await styleData.textContent()
-      styleArray.push(style.trim())
-    }
+    const styleArray = await page.$$eval('.c-contentsSpecificationsInnerList_tags th', ths => {
+      for (const th of ths) {
+        if (th.textContent.trim() === 'スタイル') {
+          const tags = Array.from(th.nextElementSibling.querySelectorAll('a'))
+          return tags.map(tag => tag.textContent.trim())
+        }
+      }
+      return []
+    })
     itemData.style = styleArray
     // 占術
-    const divinationArray = []
-    const divinationElement = tagElement[1]
-    const divinationLinkElement = await divinationElement.$$('a')
-    for (const divinationData of divinationLinkElement) {
-      const divination = await divinationData.textContent()
-      divinationArray.push(divination.trim())
-    }
+    const divinationArray = await page.$$eval('.c-contentsSpecificationsInnerList_tags th', ths => {
+      for (const th of ths) {
+        if (th.textContent.trim() === '占術') {
+          const tags = Array.from(th.nextElementSibling.querySelectorAll('a'))
+          return tags.map(tag => tag.textContent.trim())
+        }
+      }
+      return []
+    })
     itemData.divination = divinationArray
 
   }catch(error){
@@ -260,7 +263,8 @@ for(const itemLink of itemLinkArray){
 
   // BigQueryに保存
   await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
-  console.log(`${itemData.category}/${itemData.smallCategory}: ${itemLink}`)
+  console.log(`${itemData.category}/${itemData.smallCategory}: ${totalCount}`)
+  totalCount++
 }
 
 browser.close()

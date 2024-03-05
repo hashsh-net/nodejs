@@ -19,7 +19,7 @@ const categoryUrlArray = [
 
 // fromページからtoページ目までアクセスして商品情報を取得
 const from = 1
-const to = 1
+const to = 9999
 const itemLinkArray = []
 
 for(const categoryUrl of categoryUrlArray){
@@ -31,7 +31,6 @@ for(const categoryUrl of categoryUrlArray){
     // 商品一覧のリンクエレメントを取得
     const itemLinkElements = await page.$$('.c-searchPageItemList_inner')
 
-    console.log(pageNumber)
     // 商品一覧がなくなったらループ終了
     if(itemLinkElements.length == 0){
       console.log(`${categoryUrl}${pageNumber}`)
@@ -58,7 +57,6 @@ for(const itemLink of itemLinkArray){
   const itemData = {}
 
   try {
-    console.log(itemLink)
     await page.goto(itemLink)
 
     const detailButton = await page.$('.c-contentsFreeText_readMore a')
@@ -254,8 +252,6 @@ for(const itemLink of itemLinkArray){
     }
     itemData.divination = divinationArray
 
-    console.log(itemData)
-
   }catch(error){
     errorLinks.push(itemLink)
     console.log(itemLink)
@@ -264,6 +260,7 @@ for(const itemLink of itemLinkArray){
 
   // BigQueryに保存
   await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
+  console.log(`${itemData.category}/${itemData.smallCategory}: ${itemLink}`)
 }
 
 browser.close()

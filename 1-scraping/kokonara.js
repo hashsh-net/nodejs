@@ -1,40 +1,57 @@
 import { chromium } from 'playwright'
+import { saveToBigQuery } from '../lib/bigquery.js'
 import fs from 'fs'
 
-const browser = await chromium.launch({ headless: false })
-const page = await browser.newPage()
+// const browser = await chromium.launch({ headless: false })
+// const page = await browser.newPage()
 
+// 各カテゴリの検索結果画面
+const categoryUrlArray = [
+  'https://coconala.com/categories/656?service_kind=0&ref_c=1&y=0&business_flag=false&page=', // 恋愛
+  'https://coconala.com/categories/657?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 結婚
+  'https://coconala.com/categories/658?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 人生・スピリチュアル
+  'https://coconala.com/categories/659?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 総合運
+  'https://coconala.com/categories/660?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 仕事運
+  'https://coconala.com/categories/661?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 占い全般
+  'https://coconala.com/categories/80?ref_c=1&service_kind=0&y=0&business_flag=false&page=',  // 占いのやり方アドバイス
+  'https://coconala.com/categories/79?ref_c=1&service_kind=0&y=0&page=',                      // その他(占い)
+]
 
 // fromページからtoページ目までアクセスして商品情報を取得
-// const from = 500
-// const to = 999
+const from = 1
+const to = 999
+const itemLinkArray = []
 
-// const itemLinkArray = []
-// for (let pageNumber = from; pageNumber <= to; pageNumber++) {
-//   const categoryUrl = 'https://coconala.com/categories/661?ref=category_popular_subcategories&price_min=1000&price_max=5000&ref_c=1&y=0&business_flag=false&page='
-//   await page.goto(`${categoryUrl}${pageNumber}`)
-//   // 商品一覧のリンクエレメントを取得
-//   const itemLinkElements = await page.$$('.c-searchPageItemList_inner')
+for(const categoryUrl of categoryUrlArray){
+  await page.goto(`${categoryUrl}1`)
+  await page.waitForTimeout(200)
 
-//   // 商品一覧がなくなったらループ終了
-//   if(itemLinkElements.length == 0){
-//     console.log(`${categoryUrl}${pageNumber}`)
-//     break
-//   }
+  for (let pageNumber = from; pageNumber <= to; pageNumber++) {
+    const categoryUrl = 'https://coconala.com/categories/661?ref=category_popular_subcategories&price_min=1000&price_max=5000&ref_c=1&y=0&business_flag=false&page='
+    await page.goto(`${categoryUrl}${pageNumber}`)
+    // 商品一覧のリンクエレメントを取得
+    const itemLinkElements = await page.$$('.c-searchPageItemList_inner')
 
-//   // リンクがある場合は配列に商品リンクを追加
-//   for (let element of itemLinkElements) {
-//     const link = await element.getAttribute('href')
-//     itemLinkArray.push(`https://coconala.com${link}`)
-//   }
-// }
+    // 商品一覧がなくなったらループ終了
+    if(itemLinkElements.length == 0){
+      console.log(`${categoryUrl}${pageNumber}`)
+      break
+    }
+
+    // リンクがある場合は配列に商品リンクを追加
+    for (let element of itemLinkElements) {
+      const link = await element.getAttribute('href')
+      itemLinkArray.push(`https://coconala.com${link}`)
+    }
+  }
+}
 
 
-// テスト用
-const itemLinkArray = [
-  'https://coconala.com/services/3157875?ref=category_popular_subcategories&ref_kind=category&ref_no=1&pos=1&ref_sort=beginner&ref_page=1&ref_category=661&service_order=1&service_order_with_pr=1&service_order_only_pr=null',
-  'https://coconala.com/services/3144746?ref_kind=category&ref_no=6&pos=6&ref_sort=beginner&ref_page=&ref_category=656&service_order=5&service_order_with_pr=6&service_order_only_pr=null'
-]
+// // テスト用
+// const itemLinkArray = [
+//   'https://coconala.com/services/3157875?ref=category_popular_subcategories&ref_kind=category&ref_no=1&pos=1&ref_sort=beginner&ref_page=1&ref_category=661&service_order=1&service_order_with_pr=1&service_order_only_pr=null',
+//   'https://coconala.com/services/3144746?ref_kind=category&ref_no=6&pos=6&ref_sort=beginner&ref_page=&ref_category=656&service_order=5&service_order_with_pr=6&service_order_only_pr=null'
+// ]
 
 const items = []
 for(const itemLink of itemLinkArray){
@@ -48,6 +65,9 @@ for(const itemLink of itemLinkArray){
   }
 
   // =====================================================================
+  // ID
+  const idData = itemLink.match(/\/services\/(\d+)\?/)
+  itemData.id = idData[1]
   // タイトル
   itemData.title = await page.$eval('.c-overview_overview', element => element.textContent.trim())
   // サブタイトル
@@ -154,40 +174,8 @@ for(const itemLink of itemLinkArray){
   }
   itemData.divination = divinationArray
 
-  console.log(itemData)
+  // BigQueryに保存
+  await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
 }
 
-
-// function arrayToCSV(array) {
-//   let csv = 'price,salesCount,rate,rateCount,title,subtitle,detail,shopLink,optionName,optionPrice'
-//   for(const data of array){
-//     csv += '\n'
-//     csv += `${data.price},`
-//     csv += `${data.salesCount},`
-//     csv += `${data.rate},`
-//     csv += `${data.rateCount},`
-//     csv += `"${data.title.replace(/"/g, '""')}",`
-//     csv += `"${data.subtitle.replace(/"/g, '""')}",`
-//     csv += `"${data.detail.join('\n').replace(/"/g, '""')}",`
-//     csv += `${data.shopLink},`
-
-//     if(data.option.length == 0){
-//       csv += ',,'
-//     }else{
-//       let optionNumber = 1
-//       for(const option of data.option){
-//         if(optionNumber != 1){
-//           csv += '\n,,,,,,,,'
-//         }
-//         csv += `"${option.name}",${option.price}`
-//         optionNumber++
-//       }
-//     }
-//   }
-//   return csv
-// }
-
-// const csv = arrayToCSV(items)
-// fs.writeFileSync('kokonara_item.csv', csv)
-
-// await browser.close()
+browser.close()

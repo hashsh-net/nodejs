@@ -44,6 +44,15 @@ for(const categoryUrl of categoryUrlArray){
 }
 
 
+fs.writeFile('itemLinkArray.json', JSON.stringify(itemLinkArray), (err) => {
+  if (err) {
+    console.error('ファイルに書き込む際にエラーが発生しました:', err)
+  } else {
+    console.log(`エラーリンクが保存されました。`)
+  }
+})
+
+
 // テスト用
 // const itemLinkArray = [
 //   'https://coconala.com/services/53600?ref_kind=category&ref_no=5719&service_order=5719&service_order_with_pr=5719&service_order_only_pr=null',

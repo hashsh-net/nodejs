@@ -124,6 +124,7 @@ for(const shop of shopArray){
   shopData.review = review
 
   await saveToBigQuery('uranai', 'LogCoconalaUranaiShop', shopData)
+  
   console.log(`${totalCount}: ${shopData.name} done`)
   totalCount++
 }

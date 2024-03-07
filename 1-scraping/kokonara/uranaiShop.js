@@ -1,6 +1,7 @@
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 import path from 'path'
+import { saveToBigQuery } from '../../lib/bigquery.js'
 import { 
   page,
   retryPageLoad,

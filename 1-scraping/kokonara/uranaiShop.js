@@ -6,7 +6,7 @@ import {
   retryPageLoad,
   textData,
   attributeData,
-  clickBottun,
+  clickButton,
   textDataArray,
 } from '../../lib/playwright.js'
 
@@ -37,7 +37,6 @@ for(const shop of shopArray){
   const shopData = {}
 
   await retryPageLoad(page, `${baseLink}${shop.shopId}`)
-  // await retryPageLoad(page, `${baseLink}${shop.shopId}${skills}`)
   
   // ID
   shopData.id = String(shop.shopId)
@@ -101,10 +100,12 @@ for(const shop of shopArray){
     }
   }
   // プロフ文章
-  await clickBottun(page, '.p-introduction_readMoreMessage')
+  // 重すぎるからクリック中止
+  // await clickButton(page, '.p-introduction_readMoreMessage')
   shopData.profile = await textData(page, '.p-introduction_message')
   // 対応スケジュール
-  await clickBottun(page, 'c-readMoreSchedule')
+  // 重すぎるからクリック中止
+  // await clickButton(page, 'c-readMoreSchedule')
   shopData.schedule = await textData(page, '.c-dataSchedule')
   // レビュー
   const review = []
@@ -122,6 +123,8 @@ for(const shop of shopArray){
   shopData.review = review
 
   await saveToBigQuery('uranai', 'LogCoconalaUranaiShop', shopData)
+  console.log(`${totalCount}: ${shopData.name} done`)
   totalCount++
-  console.log(`${totalCount}: ${shopData.name}`)
 }
+
+console.log('all done')

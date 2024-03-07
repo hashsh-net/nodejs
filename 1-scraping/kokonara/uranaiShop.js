@@ -31,6 +31,7 @@ try {
 
 const baseLink = 'https://coconala.com/users/'
 const skills = '/skills?anchor=licenses'
+let totalCount = 1
 for(const shop of shopArray){
 
   const shopData = {}
@@ -119,6 +120,8 @@ for(const shop of shopArray){
     }
   }
   shopData.review = review
-  console.log(shopData)
 
+  await saveToBigQuery('uranai', 'LogCoconalaUranaiShop', shopData)
+  totalCount++
+  console.log(`${totalCount}: ${shopData.name}`)
 }

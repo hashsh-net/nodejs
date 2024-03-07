@@ -268,7 +268,7 @@ for(const itemLink of itemLinkArray){
   }
 
   // BigQueryに保存
-  await saveToBigQuery('uranai', 'uranaiItem', itemData)
+  await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
   console.log(`${itemData.category}/${itemData.smallCategory}: ${totalCount}`)
   totalCount++
 }

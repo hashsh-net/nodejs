@@ -9,6 +9,7 @@
   "dependencies": {
     "@google-cloud/bigquery": "^7.5.0",
     "path": "^0.12.7",
-    "playwright": "^1.42.1"
+    "playwright": "^1.42.1",
+    "twitter-api-v2": "^1.16.1"
   }
 }

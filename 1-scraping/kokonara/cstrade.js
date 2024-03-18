@@ -4,7 +4,7 @@ import { page, retryPageLoad } from '../../lib/playwright.js';
 import fs from 'fs';
 
 
-const siteUrlArray = [
+const siteUrlArray = [ 
     "https://csgoempire.com/withdraw/steam/market"
 ];
 

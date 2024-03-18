@@ -1,17 +1,17 @@
 import { page, retryPageLoad } from '../../lib/playwright.js'
-import { saveToBigQuery } from '../../lib/bigquery.js'
+// import { saveToBigQuery } from '../../lib/bigquery.js'
 import fs from 'fs'
 
 // 各カテゴリの検索結果画面
 const categoryUrlArray = [
-  'https://coconala.com/categories/656?service_kind=0&ref_c=1&y=0&business_flag=false&page=', // 恋愛
+  // 'https://coconala.com/categories/656?service_kind=0&ref_c=1&y=0&business_flag=false&page=', // 恋愛
   'https://coconala.com/categories/657?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 結婚
-  'https://coconala.com/categories/658?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 人生・スピリチュアル
-  'https://coconala.com/categories/659?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 総合運
-  'https://coconala.com/categories/660?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 仕事運
-  'https://coconala.com/categories/661?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 占い全般
-  'https://coconala.com/categories/80?ref_c=1&service_kind=0&y=0&business_flag=false&page=',  // 占いのやり方アドバイス
-  'https://coconala.com/categories/79?ref_c=1&service_kind=0&y=0&page=',                      // その他(占い)
+  // 'https://coconala.com/categories/658?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 人生・スピリチュアル
+  // 'https://coconala.com/categories/659?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 総合運
+  // 'https://coconala.com/categories/660?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 仕事運
+  // 'https://coconala.com/categories/661?ref_c=1&service_kind=0&y=0&business_flag=false&page=', // 占い全般
+  // 'https://coconala.com/categories/80?ref_c=1&service_kind=0&y=0&business_flag=false&page=',  // 占いのやり方アドバイス
+  // 'https://coconala.com/categories/79?ref_c=1&service_kind=0&y=0&page=',                      // その他(占い)
 ]
 
 // fromページからtoページ目までアクセスして商品情報を取得
@@ -268,7 +268,7 @@ for(const itemLink of itemLinkArray){
   }
 
   // BigQueryに保存
-  await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
+  // await saveToBigQuery('uranai', 'LogCoconalaUranaiItem', itemData)
   console.log(`${itemData.category}/${itemData.smallCategory}: ${totalCount}`)
   totalCount++
 }

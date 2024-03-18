@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const filePath = path.join(__dirname, 'basedata', 'uranaiShop.json')
 
 
-let shopArray
+let shopArray       
 try {
   const data = fs.readFileSync(filePath, 'utf8')
   shopArray = JSON.parse(data)

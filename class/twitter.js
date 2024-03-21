@@ -1,24 +1,19 @@
 import { TwitterApi } from 'twitter-api-v2'
-import { getConigTwitter } from '../lib/config.js'
-import { firestore } from '../lib/firebase.js'
 
 export class Twitter {
-  constructor(botId){
-    // BotID(TwitterBot)
-    this.botId = botId
+  constructor(){
     // 実行クラス
     this.twitter
   }
 
   // 初期化
   async initialize() {
-    const botInfo = await getConigTwitter(this.botId)
 
     this.twitter = new TwitterApi({
-      appKey: botInfo.TWITTER_APP_KEY,
-      appSecret: botInfo.TWITTER_APP_SECRET,
-      accessToken: botInfo.TWITTER_ACCESS_TOKEN,
-      accessSecret: botInfo.TWITTER_ACCESS_SECRET,
+      appKey: 'ここに自分のKEY',
+      appSecret: 'ここに自分のKEY',
+      accessToken: 'ここに自分のKEY',
+      accessSecret: 'ここに自分のKEY',
     })
   }
 
@@ -30,7 +25,7 @@ export class Twitter {
       const res = await this.twitter.v2.tweet(tweet)
       return res
     } catch (error) {
-      console.error(`TweetBot Error BotId: ${this.botId}\ntweet: ${error}`)
+      console.error(`TweetBot Error tweet: ${error}`)
       throw error
     }
   }
@@ -43,7 +38,7 @@ export class Twitter {
 
       return res
     } catch (error) {
-      console.error(`TweetBot Error BotId: ${this.botId}\ntweetWithImages: ${error}`)
+      console.error(`TweetBot Error \ntweetWithImages: ${error}`)
       throw error
     }
   }
@@ -54,7 +49,7 @@ export class Twitter {
       const res = await this.twitter.v2.reply(text, tweetId )
       return res
     } catch (error) {
-      console.error(`TweetBot Error BotId: ${this.botId}\nreply: ${error}`)
+      console.error(`TweetBot Error \nreply: ${error}`)
       throw error
     }
   }
@@ -66,7 +61,7 @@ export class Twitter {
 
       return res
     } catch (error) {
-      console.error(`TweetBot Error BotId: ${this.botId}\tweetThread: ${error}`)
+      console.error(`TweetBot Error \tweetThread: ${error}`)
       throw error
     }
   }
@@ -81,13 +76,6 @@ export class Twitter {
     }
 
     return mediaIds
-  }
-
-  // TweetBotのログを保存
-  async saveTweetLog(data){
-    const TwitterBotLog = firestore.collection("TwitterBotLog")
-    const docRef = await firestore.addDoc(TwitterBotLog, data)
-    return docRef.id
   }
 
 }

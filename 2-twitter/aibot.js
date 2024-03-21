@@ -1,21 +1,17 @@
-import { Twitter } from '../../class/twitter.js'
-import { getConigTwitter, setConfigTwitter } from '../../lib/config.js'
-import { createImageDalle3 } from '../../lib/openai.js'
+// import { Twitter } from '../class/twitter.js'
+import { createImageDalle3 } from '../lib/openai.js'
 
-// 今日のキーワード取得
-const config = await getConigTwitter('hotbox')
-const keywordArray = config.aiImagePrompt
-
-const keyword = keywordArray[0]
+// 今日のキーワード
+const keyword = '太巻きジョイント大好きギャル'
 
 // Twitter処理開始
-const twitter = new Twitter('hotbox')
-await twitter.initialize()
+// const twitter = new Twitter('hotbox')
+// await twitter.initialize()
 // 一つ目のツイートここから
-const tweetText = `AIが描いた「${keyword}」`
+const tweetText = `AIが考える「${keyword}」`
 // Dalle3 APIで画像生成
 const prompt = `TwitterなどのSNSで話題を生みそうな面白いアメコミ風の「${keyword}」の画像`
-const outputPath = 'src/assets/images/hotboxAiImage.png'
+const outputPath = '2-twitter/images/hotboxAiImage.png'
 const imagePath = await createImageDalle3(prompt, outputPath)
 const presentMedia = await twitter.uploadMedia([imagePath])
 // ツイートと画像まとめ
@@ -37,15 +33,8 @@ https://hotbox-japan.com/collections/all
 #毎日吸いたい`
 // ツイート実行
 const tweet_res = await twitter.tweetThread([
-  baseTweet,
-  threadTweet,
+  baseTweet, // 一つ目の画像付きツイート
+  threadTweet, // 二つ目の宣伝ツイート
 ])
-
-// 最初のキーワードを取り出してconfigDataにセット
-const configData = {
-  aiImagePrompt: keywordArray.slice(1)
-}
-
-await setConfigTwitter('hotbox', configData)
 
 console.log(tweet_res)

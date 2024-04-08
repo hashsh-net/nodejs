@@ -13,19 +13,26 @@ async function main() {
 
     for(const siteUrl of siteUrlArray) {
 
-      await page.goto(siteUrl)]
+      await page.goto(siteUrl)
 
       await page.waitForTimeout(2000)
 
+      await page.screenshot({ path: "example.png" });
+
       // 正しいセレクターを使用して要素を取得する
-      const element = await page.$('img[src^="https://community.cloudflare.steamstatic.com/"]');
-      console.log(element)
+      const elements = await page.$$('div[class^="relative rounded"]');
+      console.log(elements)
 
       // 要素が見つかった場合
-      if (element) {
+      if (elements) {
           // 要素からテキストを取得する
-          const text = await page.evaluate(element => element.getAttribute('alt'), element);
-          console.log(text); // 結果を出力
+          for(element of elements){
+            const paragraphElements = element.querySelectorAll('p');
+            paragraphElements.forEach(paragraph => {
+            const textInsideParagraph = paragraph.innerText;
+            console.log(textInsideParagraph);
+            });
+          }
       } else {
           console.log('要素が見つかりませんでした');
       }

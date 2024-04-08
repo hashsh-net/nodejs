@@ -1,10 +1,8 @@
 import { chromium } from 'playwright';
 
-
 const siteUrlArray = [ 
     "https://csgoempire.com/withdraw/steam/market"
 ];
-
 
 async function main() {
     const browser = await chromium.launch();
@@ -12,30 +10,24 @@ async function main() {
     const page = await context.newPage();
 
     for(const siteUrl of siteUrlArray) {
+        await page.goto(siteUrl);
+        await page.waitForTimeout(2000);
+        await page.screenshot({ path: "example.png" });
 
-      await page.goto(siteUrl)
+        const elements = await page.$$('div[class^="relative rounded"]');
+        console.log(elements);
 
-      await page.waitForTimeout(2000)
-
-      await page.screenshot({ path: "example.png" });
-
-      // 正しいセレクターを使用して要素を取得する
-      const elements = await page.$$('div[class^="relative rounded"]');
-      console.log(elements)
-
-      // 要素が見つかった場合
-      if (elements) {
-          // 要素からテキストを取得する
-          for(element of elements){
-            const paragraphElements = element.querySelectorAll('p');
-            paragraphElements.forEach(paragraph => {
-            const textInsideParagraph = paragraph.innerText;
-            console.log(textInsideParagraph);
-            });
-          }
-      } else {
-          console.log('要素が見つかりませんでした');
-      }
+        if (elements.length > 0) {
+            for (const element of elements) {
+                const paragraphElements = await element.$$('p');
+                for (const paragraph of paragraphElements) {
+                    const textInsideParagraph = await paragraph.innerText();
+                    console.log(textInsideParagraph);
+                }
+            }
+        } else {
+            console.log('要素が見つかりませんでした');
+        }
     }
 
     await browser.close();

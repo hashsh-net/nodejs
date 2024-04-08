@@ -13,7 +13,9 @@ async function main() {
 
     for(const siteUrl of siteUrlArray) {
 
-      await page.goto(siteUrl)
+      await page.goto(siteUrl)]
+
+      await page.waitForTimeout(2000)
 
       // 正しいセレクターを使用して要素を取得する
       const element = await page.$('img[src^="https://community.cloudflare.steamstatic.com/"]');

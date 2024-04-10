@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { sendTextMessage } from '../../lib/lineNotify.js';
 
 const siteUrlArray = [ 
     "https://csgoempire.com/withdraw/steam/market"
@@ -22,6 +23,8 @@ async function main() {
         const button2 = page.locator('[for="trade_type_filter_auctions_only"]').locator("svg.h-full.w-full");
         button2.click();
 
+        await page.waitForTimeout(500);
+
         const elements = await page.$$('div[class^="relative rounded"]')
 
        if (elements.length > 0) {
@@ -37,6 +40,12 @@ async function main() {
             console.log('要素が見つかりませんでした');
         }
     }
+
+    //ライン通知部分
+    const token = "r273lQRIbRaiiekIylt5P2LaoMoiBMm4byFCh8krBRv";
+    const message = 'てすとだよ';
+    await sendTextMessage(token, message);
+    //ライン通知部分終わり
 
     await browser.close();
 }

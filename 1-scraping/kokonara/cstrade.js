@@ -5,24 +5,32 @@ const siteUrlArray = [
 ];
 
 async function main() {
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({headless : false});
     const context = await browser.newContext();
     const page = await context.newPage();
 
     for(const siteUrl of siteUrlArray) {
         await page.goto(siteUrl);
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(5000);
         await page.screenshot({ path: "example.png" });
 
-        const elements = await page.$$('div[class^="relative rounded"]');
-        console.log(elements);
+        const button = page.locator("h4.ellipsis").locator("text = Filters");
+        button.click();
 
-        if (elements.length > 0) {
+        await page.waitForTimeout(1000);
+
+        const button2 = page.locator('[for="trade_type_filter_auctions_only"]').locator("svg.h-full.w-full");
+        button2.click();
+
+        const elements = await page.$$('div[class^="relative rounded"]')
+
+       if (elements.length > 0) {
             for (const element of elements) {
-                const paragraphElements = await element.$$('p');
+                const paragraphElements = await element.$$('.size-medium')
                 for (const paragraph of paragraphElements) {
-                    const textInsideParagraph = await paragraph.innerText();
-                    console.log(textInsideParagraph);
+                    const textInsideParagraph = await paragraph.textContent();
+                    console.log(textInsideParagraph)
+                    // if(textInsideParagraph.length == 1){console.log(textInsideParagraph)};
                 }
             }
         } else {

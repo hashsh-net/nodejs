@@ -8,8 +8,11 @@
   "scripts": {},
   "dependencies": {
     "@google-cloud/bigquery": "^7.5.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
     "path": "^0.12.7",
     "playwright": "^1.42.1",
+    "qs": "^6.12.0",
     "twitter-api-v2": "^1.16.1"
   }
 }

@@ -9,6 +9,7 @@ async function main() {
     const browser = await chromium.launch({headless : false});
     const context = await browser.newContext();
     const page = await context.newPage();
+    let linetext = "てすとだよ";
 
     for(const siteUrl of siteUrlArray) {
         await page.goto(siteUrl);
@@ -29,10 +30,11 @@ async function main() {
 
        if (elements.length > 0) {
             for (const element of elements) {
-                const paragraphElements = await element.$$('.size-medium')
+                const paragraphElements = await element.$$('.popover-container .size-medium')
                 for (const paragraph of paragraphElements) {
                     const textInsideParagraph = await paragraph.textContent();
                     console.log(textInsideParagraph)
+                    linetext = textInsideParagraph;
                     // if(textInsideParagraph.length == 1){console.log(textInsideParagraph)};
                 }
             }
@@ -43,8 +45,7 @@ async function main() {
 
     //ライン通知部分
     const token = "r273lQRIbRaiiekIylt5P2LaoMoiBMm4byFCh8krBRv";
-    const message = 'てすとだよ';
-    await sendTextMessage(token, message);
+    await sendTextMessage(token, linetext);
     //ライン通知部分終わり
 
     await browser.close();

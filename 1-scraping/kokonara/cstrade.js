@@ -9,6 +9,7 @@ async function main() {
   const page = await context.newPage();
   let linetext = "てすとだよ";
   let lineUrl;
+  let lineName;
   let nyusatuelement;
 
   for (const siteUrl of siteUrlArray) {
@@ -38,15 +39,28 @@ async function main() {
       console.log('要素が見つかりませんでした');
     }
 
+    //入札のあったelementからurlを取得している
     const nyusatuelement2 = await nyusatuelement.$$eval('a[href^="/item/"]', nodes => nodes.length > 0 ? nodes[0].href : null);
     if (nyusatuelement2) {
     lineUrl = nyusatuelement2;
     }
+    //urlおわり
+
+    //入札のあったelementから武器の名前を取得
+    const nyusatuelement3 = await nyusatuelement.$eval('p.size-medium', el => el ? el.textContent.trim() : null);
+    if(nyusatuelement3){
+    lineName = nyusatuelement3;
+    } else {
+    console.log('武器が取得できませんでした');
+    }
+    //武器の名前取得終わり
+
   }
 
   const token = "r273lQRIbRaiiekIylt5P2LaoMoiBMm4byFCh8krBRv";
   await sendTextMessage(token, linetext);
   await sendTextMessage(token, lineUrl);
+  await sendTextMessage(token, lineName);
 
   await browser.close();
 }

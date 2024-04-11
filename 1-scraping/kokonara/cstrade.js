@@ -1,9 +1,15 @@
 import { chromium } from 'playwright';
 import { sendTextMessage } from '../../lib/lineNotify.js';
 
+//ランダムな時間を返す
+function RT(time){
+    return Math.random()*time/4 + time;
+}
+
 const siteUrlArray = ["https://csgoempire.com/withdraw/steam/market"];
 
 async function main() {
+  //console.log(randTime(500));
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -15,23 +21,23 @@ async function main() {
 
   for (const siteUrl of siteUrlArray) {
     await page.goto(siteUrl);
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(RT(5000));
     await page.screenshot({ path: "example.png" });
     const button = page.locator("h4.ellipsis").locator("text = Filters");
     button.click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(RT(1000));
     const button2 = page.locator('[for="trade_type_filter_auctions_only"]').locator("svg.h-full.w-full");
     button2.click();
 
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(RT(500));
     //プライスの範囲を入力してアプライ
     await page.locator("#scrollable-sidebar-element > div:nth-child(1) > div.price-range.mt-lg.flex.items-center.justify-between > div:nth-child(1) > input").fill("50");
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(RT(300));
     const button3 = page.locator("text = Apply");
     button3.click();
     //プライス範囲入力終了
 
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(RT(500));
     const elements = await page.$$('div[class^="relative rounded"]');
 
     if (elements.length > 0) {
